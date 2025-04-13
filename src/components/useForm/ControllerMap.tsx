@@ -6,6 +6,7 @@ import {
   type InputControllerProps,
   type InputType,
 } from './InputController';
+import { TextareaController } from './TextareaController';
 
 // Define the FormFieldConfig type based on InputControllerProps
 export type FormFieldConfig<T extends FieldValues = FieldValues> = {
@@ -51,6 +52,8 @@ const ControllerMap = <T extends FieldValues>(props: FormFieldConfig<T>) => {
     case 'url':
     case 'tel':
       return <InputController {...props} />;
+    case 'textarea':
+      return <TextareaController {...props} />;
     default:
       return null;
   }
