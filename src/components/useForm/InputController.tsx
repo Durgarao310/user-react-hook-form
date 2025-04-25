@@ -23,11 +23,7 @@ export type InputType =
   | 'email'
   | 'password'
   | 'number'
-  | 'select'
   | 'textarea'
-  | 'checkbox'
-  | 'radio'
-  | 'date'
   | 'url'
   | 'tel';
 
@@ -91,7 +87,7 @@ export function InputController<T extends FieldValues>({
   rules,
   icon,
   iconPosition = 'left',
-  placeholder,
+  placeholder = '',
   helperText,
   disabled = false,
   readOnly = false,
@@ -224,9 +220,9 @@ export function InputController<T extends FieldValues>({
                   readOnly={readOnly}
                   autoFocus={autoFocus}
                   autoComplete={autoComplete}
-                  min={min}
+                  min={min ?? undefined}
                   max={max}
-                  step={step}
+                  step={step ?? undefined}
                   ref={ref}
                   aria-invalid={!!fieldState.error}
                   aria-describedby={
