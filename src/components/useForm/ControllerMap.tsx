@@ -6,11 +6,10 @@ import {
   type InputControllerProps,
   type InputType,
 } from './InputController';
-import { TextareaController } from './TextareaController';
 
 // Define the FormFieldConfig type based on InputControllerProps
 export type FormFieldConfig<T extends FieldValues = FieldValues> = {
-  type: InputType; // Use InputType from InputController ('text' | 'number' | 'email' | 'password' | 'url' | 'tel')
+  type: InputType; // Use InputType from InputController ('text' | 'number' | 'email' | 'password' | 'url' | 'tel' | 'textarea')
   name: Path<T>; // Use Path<T> to match the expected type in InputControllerProps
   label: string;
   control: Control<T>; // Control from react-hook-form
@@ -28,7 +27,6 @@ export type FormFieldConfig<T extends FieldValues = FieldValues> = {
   inputClassName?: string;
   labelClassName?: string;
   errorClassName?: string;
-  helperTextClassName?: string;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
   min?: number; // For type="number"
@@ -39,6 +37,12 @@ export type FormFieldConfig<T extends FieldValues = FieldValues> = {
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   clearErrors?: (name: Path<T> | Path<T>[]) => void; // Align with React Hook Form  hidden?: boolean; // To hide the field
   hidden?: boolean;
+  defaultValue?: string | number; // Default value for the field
+  clearable?: boolean; // For clearable input
+  clearableIcon?: React.ReactNode; // Icon for clearable input
+  clearableOnClick?: () => void; // Function to call when clearable icon is clicked
+  helperTextClassName?: string; // Class name for helper text
+
 };
 
 // ControllerMap component
@@ -51,9 +55,9 @@ const ControllerMap = <T extends FieldValues>(props: FormFieldConfig<T>) => {
     case 'password':
     case 'url':
     case 'tel':
-      return <InputController {...props} />;
     case 'textarea':
-      return <TextareaController {...props} />;
+      return <InputController {...props} />;
+
     default:
       return null;
   }

@@ -25,7 +25,6 @@ function FormGenerator<T extends FieldValues>({
       {fields.map((field) => {
         const { hidden = false, fullWidth = false, name } = field;
         if (hidden) return null;
-
         return (
           <Fragment key={name}>
             <div className={cn(fullWidth ? 'col-span-2' : '', className)}>

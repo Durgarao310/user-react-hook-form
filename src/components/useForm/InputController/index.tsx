@@ -8,8 +8,8 @@ import type {
   RegisterOptions,
 } from 'react-hook-form';
 import { Eye, EyeOff } from 'lucide-react';
-import { BaseInput } from './BaseInput';
 import { cn } from '@/lib/utils';
+import { BaseInput } from '../BaseInput';
 
 type InputState = 'default' | 'disabled' | 'readonly' | 'error' | 'filled';
 
@@ -21,9 +21,6 @@ export type InputType =
   | 'textarea'
   | 'tel'
   | 'url'
-  | 'date'
-  | 'datetime-local'
-  | 'time'
   | 'search';
 
 export interface InputControllerProps<T extends FieldValues> {
