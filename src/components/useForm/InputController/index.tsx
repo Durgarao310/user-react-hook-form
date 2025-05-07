@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Controller } from 'react-hook-form';
 import type {
   Control,
@@ -65,6 +65,7 @@ export interface InputControllerProps<T extends FieldValues> {
   labelClassName?: string;
   errorClassName?: string;
   helperTextClassName?: string;
+  theme?: string;
 }
 
 export function InputController<T extends FieldValues>({
@@ -100,6 +101,7 @@ export function InputController<T extends FieldValues>({
   max,
   step,
   clearErrors,
+  theme,
 }: InputControllerProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => {
@@ -110,8 +112,16 @@ export function InputController<T extends FieldValues>({
 
   const inputId = `input-${name}`;
 
+  const effectiveIcon = useMemo(() => {
+    return type === 'password' && !icon
+      ? showPassword
+        ? <Eye />
+        : <EyeOff />
+      : icon;
+  }, [type, icon, showPassword]);
+
   return (
-    <div className={cn(fullWidth ? 'w-full' : '', className)}>
+    <div className={cn(fullWidth ? 'w-full' : '', className, theme)}>
       <label
         htmlFor={inputId}
         className={cn(
@@ -137,13 +147,6 @@ export function InputController<T extends FieldValues>({
           else if (readOnly) currentState = 'readonly';
           else if (fieldState.error) currentState = 'error';
           else if (value) currentState = 'filled';
-
-          const effectiveIcon =
-            type === 'password' && !icon
-              ? showPassword
-                ? <Eye />
-                : <EyeOff />
-              : icon;
 
           const isTextarea = type === 'textarea';
 
@@ -189,14 +192,25 @@ export function InputController<T extends FieldValues>({
                   clearableOnClick?.();
                 }}
                 clearableIcon={clearableIcon}
+                aria-invalid={fieldState.error ? 'true' : 'false'}
+                aria-describedby={
+                  fieldState.error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined
+                }
               />
 
               {fieldState.error ? (
-                <p className={cn('text-sm text-red-500 mt-1', errorClassName)} role="alert">
-                  {fieldState.error.message}
+                <p
+                  id={`${inputId}-error`}
+                  className={cn('text-sm text-red-500 mt-1', errorClassName)}
+                  role="alert"
+                >
+                  {fieldState.error.message || 'Invalid input'}
                 </p>
               ) : helperText ? (
-                <p className={cn('text-sm text-neutral-500 mt-1', helperTextClassName)}>
+                <p
+                  id={`${inputId}-helper`}
+                  className={cn('text-sm text-neutral-500 mt-1', helperTextClassName)}
+                >
                   {helperText}
                 </p>
               ) : null}

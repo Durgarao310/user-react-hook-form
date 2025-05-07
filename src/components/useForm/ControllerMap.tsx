@@ -42,7 +42,6 @@ export type FormFieldConfig<T extends FieldValues = FieldValues> = {
   clearableIcon?: React.ReactNode; // Icon for clearable input
   clearableOnClick?: () => void; // Function to call when clearable icon is clicked
   helperTextClassName?: string; // Class name for helper text
-
 };
 
 // ControllerMap component
@@ -57,7 +56,6 @@ const ControllerMap = <T extends FieldValues>(props: FormFieldConfig<T>) => {
     case 'tel':
     case 'textarea':
       return <InputController {...props} />;
-
     default:
       return null;
   }

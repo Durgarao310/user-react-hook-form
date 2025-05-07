@@ -1,7 +1,7 @@
 // components/form/BaseInput.tsx
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { ForwardedRef } from 'react';
 
 const sizeClasses = {
   sm: 'text-xs py-1 px-2',
@@ -21,6 +21,8 @@ const iconSizeClasses = {
 } as const;
 
 export interface BaseInputProps {
+  id?: string;
+  ref?: ForwardedRef<HTMLInputElement | HTMLTextAreaElement>; // Add this line
   type: string;
   value?: string | number;
   onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
@@ -49,38 +51,45 @@ export interface BaseInputProps {
   name: string;
 }
 
-export function BaseInput({
-  type,
-  value,
-  onChange,
-  onBlur,
-  onFocus,
-  disabled,
-  readOnly,
-  autoFocus,
-  autoComplete,
-  placeholder,
-  icon,
-  iconPosition = 'left',
-  showPasswordToggle,
-  showPassword,
-  togglePasswordVisibility,
-  size = 'md',
-  currentState,
-  inputClassName,
-  min,
-  max,
-  step,
-  textarea = false,
-  clearable = false,
-  onClear,
-  clearableIcon,
-  name,
-}: BaseInputProps) {
+export const BaseInput = React.forwardRef<
+  HTMLInputElement | HTMLTextAreaElement,
+  BaseInputProps
+>(function BaseInput(
+  {
+    id,
+    type,
+    value,
+    onChange,
+    onBlur,
+    onFocus,
+    disabled,
+    readOnly,
+    autoFocus,
+    autoComplete,
+    placeholder,
+    icon,
+    iconPosition = 'left',
+    showPasswordToggle,
+    showPassword,
+    togglePasswordVisibility,
+    size = 'md',
+    currentState = 'default',
+    inputClassName,
+    min,
+    max,
+    step,
+    textarea = false,
+    clearable = false,
+    onClear,
+    clearableIcon,
+    name,
+  },
+  ref
+) {
   const effectiveType = type === 'password' && showPassword ? 'text' : type;
 
   const commonProps = {
-    id: name,
+    id,
     name,
     value,
     onChange,
@@ -91,6 +100,7 @@ export function BaseInput({
     autoFocus,
     autoComplete,
     placeholder,
+    ref,
     className: cn(
       'w-full border rounded-md transition-all duration-200 focus:outline-none',
       sizeClasses[size],
@@ -150,15 +160,24 @@ export function BaseInput({
       )}
 
       {textarea ? (
-        <textarea {...commonProps as any} />
+        <textarea {...(commonProps as React.TextareaHTMLAttributes<HTMLTextAreaElement>)} />
       ) : (
-        <input type={effectiveType} {...commonProps} />
+        <input type={effectiveType} {...commonProps} ref={ref as React.Ref<HTMLInputElement>} />
       )}
 
       {clearable && value && (
         <div
           className="absolute right-10 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer"
           onClick={onClear}
+          aria-label="Clear input"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onClear?.();
+            }
+          }}
         >
           {clearableIcon ?? <X size={16} />}
         </div>
@@ -181,4 +200,4 @@ export function BaseInput({
       )}
     </div>
   );
-}
+});
