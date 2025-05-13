@@ -1,203 +1,250 @@
-// components/form/BaseInput.tsx
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import React, { ForwardedRef } from 'react';
+import React, { forwardRef, useCallback, useState } from "react";
+import { cn } from "@/lib/utils"; // Classnames utility (e.g., clsx or tailwind-merge)
+import { FieldError } from "react-hook-form";
+import { BaseInputProps } from "./types";
 
-const sizeClasses = {
-  sm: 'text-xs py-1 px-2',
-  md: 'text-sm py-2 px-3',
-  lg: 'text-md py-3 px-4',
-} as const;
+export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(
+  (
+    {
+      id,
+      name,
+      type = "text",
+      label,
+      value,
+      onChange,
+      onBlur,
+      required,
+      readOnly,
+      disabled,
+      error,
+      placeholder,
+      autoFocus,
+      autoComplete,
+      hidden,
+      minLength,
+      maxLength,
+      min,
+      max,
+      pattern,
+      step,
+      inputMode,
+      autoCapitalize,
+      spellCheck,
+      ariaLabel,
+      ariaDescribedBy,
+      ariaInvalid,
+      role,
+      className,
+      prefixIcon,
+      suffixIcon,
+      prefixIconClassName,
+      suffixIconClassName,
+      requiredIndicator = "*",
+      size = "md",
+      variant = "outline",
+      clearable = false,
+      onClear,
+    },
+    ref
+  ) => {
+    const [isFocused, setIsFocused] = useState(false);
 
-const iconPositionClasses = {
-  left: 'pl-10',
-  right: 'pr-10',
-} as const;
+    // Normalize error messages
+    const normalizeError = useCallback(
+      (err: string | FieldError | string[] | undefined): string[] => {
+        if (!err) return [];
+        if (typeof err === "string") return [err];
+        if (Array.isArray(err)) return err;
+        return err.message ? [err.message] : [];
+      },
+      []
+    );
 
-const iconSizeClasses = {
-  sm: 'w-4 h-4',
-  md: 'w-5 h-5',
-  lg: 'w-6 h-6',
-} as const;
+    // Handle blur
+    const handleBlur = useCallback(
+      (e: React.FocusEvent<HTMLInputElement>) => {
+        setIsFocused(false);
+        onBlur?.(e);
+      },
+      [onBlur]
+    );
 
-export interface BaseInputProps {
-  id?: string;
-  ref?: ForwardedRef<HTMLInputElement | HTMLTextAreaElement>; // Add this line
-  type: string;
-  value?: string | number;
-  onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
-  onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
-  onFocus?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
-  disabled?: boolean;
-  readOnly?: boolean;
-  autoFocus?: boolean;
-  autoComplete?: string;
-  placeholder?: string;
-  icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
-  showPasswordToggle?: boolean;
-  showPassword?: boolean;
-  togglePasswordVisibility?: () => void;
-  size?: 'sm' | 'md' | 'lg';
-  currentState: 'default' | 'filled' | 'error' | 'disabled' | 'readonly';
-  inputClassName?: string;
-  min?: number;
-  max?: number;
-  step?: number;
-  textarea?: boolean;
-  clearable?: boolean;
-  onClear?: () => void;
-  clearableIcon?: React.ReactNode;
-  name: string;
-}
+    // Handle focus
+    const handleFocus = useCallback(
+      (e: React.FocusEvent<HTMLInputElement>) => {
+        setIsFocused(true);
+      },
+      []
+    );
 
-export const BaseInput = React.forwardRef<
-  HTMLInputElement | HTMLTextAreaElement,
-  BaseInputProps
->(function BaseInput(
-  {
-    id,
-    type,
-    value,
-    onChange,
-    onBlur,
-    onFocus,
-    disabled,
-    readOnly,
-    autoFocus,
-    autoComplete,
-    placeholder,
-    icon,
-    iconPosition = 'left',
-    showPasswordToggle,
-    showPassword,
-    togglePasswordVisibility,
-    size = 'md',
-    currentState = 'default',
-    inputClassName,
-    min,
-    max,
-    step,
-    textarea = false,
-    clearable = false,
-    onClear,
-    clearableIcon,
-    name,
-  },
-  ref
-) {
-  const effectiveType = type === 'password' && showPassword ? 'text' : type;
+    // Handle clear
+    const handleClear = useCallback(() => {
+      if (onClear) {
+        onClear();
+      } else if (onChange) {
+        const event = {
+          target: { value: "" },
+        } as React.ChangeEvent<HTMLInputElement>;
+        onChange(event);
+      }
+    }, [onChange, onClear]);
 
-  const commonProps = {
-    id,
-    name,
-    value,
-    onChange,
-    onBlur,
-    onFocus,
-    disabled,
-    readOnly,
-    autoFocus,
-    autoComplete,
-    placeholder,
-    ref,
-    className: cn(
-      'w-full border rounded-md transition-all duration-200 focus:outline-none',
-      sizeClasses[size],
-      icon ? iconPositionClasses[iconPosition] : '',
-      currentState === 'default' &&
-        'border-neutral-300 bg-white text-neutral-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100',
-      currentState === 'error' &&
-        'border-red-500 bg-white text-neutral-900 focus:border-red-500 focus:ring-2 focus:ring-red-100',
-      currentState === 'disabled' &&
-        'border-neutral-200 bg-neutral-100 text-neutral-400 cursor-not-allowed',
-      currentState === 'readonly' &&
-        'border-neutral-200 bg-neutral-50 text-neutral-800',
-      inputClassName
-    ),
-    min,
-    max,
-    step,
-  };
+    // Combine errors
+    const errorMessages = normalizeError(error);
 
-  return (
-    <div className="relative">
-      {icon && iconPosition === 'left' && (
-        <div
-          className={cn(
-            'absolute left-3 top-1/2 -translate-y-1/2',
-            iconSizeClasses[size],
-            currentState === 'disabled'
-              ? 'text-neutral-400'
-              : currentState === 'error'
-              ? 'text-red-500'
-              : 'text-neutral-500',
-            showPasswordToggle ? 'cursor-pointer' : ''
+    // Size and variant styles
+    const sizeStyles = {
+      sm: "text-sm py-1.5 px-2",
+      md: "text-base py-2 px-3",
+      lg: "text-lg py-2.5 px-4",
+    };
+
+    const variantStyles = {
+      outline: "border border-gray-300 rounded-md",
+      filled: "bg-gray-50 border border-transparent rounded-md",
+      underline: "border-b-2 border-gray-300 rounded-none",
+    };
+
+    return (
+      <div className={cn("relative w-full", hidden && "hidden")}>
+        {/* Label */}
+        {label && (
+          <label
+            htmlFor={id}
+            className={cn(
+              "block text-sm font-medium mb-1.5 transition-colors",
+              errorMessages.length > 0 ? "text-red-600" : "text-gray-900",
+              disabled && "text-gray-400 cursor-not-allowed",
+              readOnly && "text-gray-500 cursor-default",
+              required &&
+                !disabled &&
+                !readOnly &&
+                `after:content-['${requiredIndicator}'] after:text-red-600 after:ml-0.5 after:text-sm`
+            )}
+          >
+            {label}
+          </label>
+        )}
+
+        {/* Input Container */}
+        <div className="relative flex items-center">
+          {/* Prefix Icon */}
+          {prefixIcon && (
+            <div
+              className={cn(
+                "absolute left-3 flex items-center pointer-events-none text-gray-400",
+                size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base",
+                prefixIconClassName
+              )}
+            >
+              {prefixIcon}
+            </div>
           )}
-          role={showPasswordToggle ? 'button' : undefined}
-          tabIndex={showPasswordToggle ? 0 : undefined}
-          aria-label={
-            showPasswordToggle
-              ? showPassword
-                ? 'Hide password'
-                : 'Show password'
-              : undefined
-          }
-          onClick={showPasswordToggle ? togglePasswordVisibility : undefined}
-          onKeyDown={
-            showPasswordToggle
-              ? (e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    togglePasswordVisibility?.();
-                  }
-                }
-              : undefined
-          }
-        >
-          {icon}
-        </div>
-      )}
 
-      {textarea ? (
-        <textarea {...(commonProps as React.TextareaHTMLAttributes<HTMLTextAreaElement>)} />
-      ) : (
-        <input type={effectiveType} {...commonProps} ref={ref as React.Ref<HTMLInputElement>} />
-      )}
-
-      {clearable && value && (
-        <div
-          className="absolute right-10 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer"
-          onClick={onClear}
-          aria-label="Clear input"
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onClear?.();
+          {/* Input */}
+          <input
+            ref={ref}
+            id={id}
+            name={name}
+            type={type}
+            value={value}
+            onChange={onChange}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+            required={required}
+            aria-required={required}
+            readOnly={readOnly}
+            disabled={disabled}
+            placeholder={placeholder}
+            autoFocus={autoFocus}
+            autoComplete={autoComplete}
+            minLength={minLength}
+            maxLength={maxLength}
+            min={min}
+            max={max}
+            pattern={pattern}
+            step={step}
+            inputMode={inputMode}
+            autoCapitalize={autoCapitalize}
+            spellCheck={spellCheck}
+            aria-label={ariaLabel || label}
+            aria-describedby={
+              errorMessages.length > 0 ? `${id}-error` : ariaDescribedBy
             }
-          }}
-        >
-          {clearableIcon ?? <X size={16} />}
-        </div>
-      )}
+            aria-invalid={ariaInvalid ?? errorMessages.length > 0}
+            role={role}
+            className={cn(
+              "w-full transition-all duration-200",
+              sizeStyles[size],
+              variantStyles[variant],
+              "focus:outline-none focus:ring-2 focus:ring-blue-200",
+              errorMessages.length > 0
+                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                : isFocused
+                ? "border-blue-500"
+                : "border-gray-300",
+              disabled && "bg-gray-100 cursor-not-allowed opacity-50",
+              readOnly && "bg-gray-50 text-gray-500 cursor-default",
+              prefixIcon && size === "sm" ? "pl-8" : prefixIcon ? "pl-10" : "",
+              (suffixIcon || (clearable && value)) &&
+                (size === "sm" ? "pr-8" : "pr-10"),
+              className
+            )}
+          />
 
-      {icon && iconPosition === 'right' && (
-        <div
-          className={cn(
-            'absolute right-3 top-1/2 -translate-y-1/2',
-            iconSizeClasses[size],
-            currentState === 'disabled'
-              ? 'text-neutral-400'
-              : currentState === 'error'
-              ? 'text-red-500'
-              : 'text-neutral-500'
+          {/* Suffix Icon or Clear Button */}
+          {clearable && value && !suffixIcon && !disabled && !readOnly ? (
+            <button
+              type="button"
+              onClick={handleClear}
+              className={cn(
+                "absolute right-3 flex items-center text-gray-400 hover:text-gray-600",
+                size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base"
+              )}
+              aria-label="Clear input"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          ) : (
+            suffixIcon && (
+              <div
+                className={cn(
+                  "absolute right-3 flex items-center pointer-events-none text-gray-400",
+                  size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base",
+                  suffixIconClassName
+                )}
+              >
+                {suffixIcon}
+              </div>
+            )
           )}
-        >
-          {icon}
         </div>
-      )}
-    </div>
-  );
-});
+
+        {/* Error Messages */}
+        {errorMessages.length > 0 && (
+          <div id={`${id}-error`} className="mt-1 space-y-1" role="alert">
+            {errorMessages.map((msg, index) => (
+              <p key={index} className="text-sm text-red-600">
+                {msg}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+BaseInput.displayName = "BaseInput";

@@ -6,6 +6,12 @@ import {
   type InputControllerProps,
   type InputType,
 } from './InputController';
+import NumberController from './NumberController';
+import TextController from './TextController';
+import EmailController from './EmailController';
+import PasswordController from './PasswordController';
+import UrlController from './UrlController';
+import TelController from './TelController';
 
 // Define the FormFieldConfig type based on InputControllerProps
 export type FormFieldConfig<T extends FieldValues = FieldValues> = {
@@ -49,11 +55,17 @@ const ControllerMap = <T extends FieldValues>(props: FormFieldConfig<T>) => {
   const { type } = props;
   switch (type) {
     case 'text':
+      return <TextController {...props} />;
     case 'number':
+      return <NumberController {...props} />;
     case 'email':
+      return <EmailController {...props} />;
     case 'password':
+      return <PasswordController {...props} />;
     case 'url':
+      return <UrlController {...props} />;
     case 'tel':
+      return <TelController {...props} />;
     case 'textarea':
       return <InputController {...props} />;
     default:
