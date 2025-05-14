@@ -69,14 +69,6 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(
       [onBlur]
     );
 
-    // Handle focus
-    const handleFocus = useCallback(
-      (e: React.FocusEvent<HTMLInputElement>) => {
-        setIsFocused(true);
-      },
-      []
-    );
-
     // Handle clear
     const handleClear = useCallback(() => {
       if (onClear) {
@@ -150,7 +142,6 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(
             value={value}
             onChange={onChange}
             onBlur={handleBlur}
-            onFocus={handleFocus}
             required={required}
             aria-required={required}
             readOnly={readOnly}

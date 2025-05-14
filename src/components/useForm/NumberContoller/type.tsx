@@ -10,5 +10,5 @@ export interface NumberControllerProps<T extends FieldValues> {
   control: Control<T>;
   rules?: Record<string, unknown>;
   defaultValue?: T[Path<T>];
-  onChange?: (value: string | number) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }

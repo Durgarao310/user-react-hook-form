@@ -2,7 +2,6 @@ import { Controller, FieldValues } from "react-hook-form";
 import { BaseInput } from "../BaseInput";
 import { NumberControllerProps } from "./type";
 
-
 export function NumberController<T extends FieldValues>({
   id,
   name,
@@ -34,11 +33,10 @@ export function NumberController<T extends FieldValues>({
         fieldState: { error },
       }) => {
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          const val = e.target.value;
           if (onChange) {
-            onChange(val);
+            onChange(e);
           }
-          controllerOnChange(val);
+          controllerOnChange(e);
         };
 
         return (
